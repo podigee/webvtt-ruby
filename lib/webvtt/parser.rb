@@ -8,6 +8,12 @@ module WebVTT
     Blob.new(content)
   end
 
+  def self.from_srt_blob(srt_content)
+    content = convert_srt_to_webvtt(srt_content)
+
+    Blob.new(content)
+  end
+
   def self.convert_from_srt(srt_file, output=nil)
     if !::File.exists?(srt_file)
       raise InputError, "SRT file not found"
@@ -16,15 +22,19 @@ module WebVTT
     srt = ::File.read(srt_file)
     output ||= srt_file.gsub(".srt", ".vtt")
 
+    vtt = convert_srt_to_webvtt(srt)
+
+    ::File.open(output, "w") {|f| f.write(vtt)}
+
+    return File.new(output)
+  end
+
+  def self.convert_srt_to_webvtt(srt)
     # convert timestamps and save the file
     srt.gsub!(/([0-9]{2}:[0-9]{2}:[0-9]{2})([,])([0-9]{3})/, '\1.\3')
     # normalize new line character
     srt.gsub!("\r\n", "\n")
-
-    srt = "WEBVTT\n\n#{srt}".strip
-    ::File.open(output, "w") {|f| f.write(srt)}
-
-    return File.new(output)
+    "WEBVTT\n\n#{srt}".strip
   end
 
   class Blob

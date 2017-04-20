@@ -135,8 +135,14 @@ The text should change)
 
   def test_convert_srt_to_webvtt
     webvtt = WebVTT.convert_from_srt("tests/subtitles/test_from_srt.srt")
-    assert_instance_of WebVTT::File, webvtt
     assert_equal 2, webvtt.cues.size
+  end
+
+  def test_convert_srt_blob_to_webvtt
+    srt_blob = File.read("tests/subtitles/test_from_srt.srt")
+    webvtt = WebVTT.from_srt_blob(srt_blob)
+    vtt_blob = File.read("tests/subtitles/test_from_srt.vtt")
+    assert_equal webvtt.to_webvtt, vtt_blob
   end
 
   def test_parse_big_file
